@@ -4,49 +4,46 @@ languages:
 - azdeveloper
 - csharp
 - bicep
-- bash
 - powershell
 - json
-- xml
 products:
-- azure-api-management
-- azure-cache-redis
-- azure-dns
-- azure-log-analytics
-- azure-monitor
-- azure-private-link
-- azure-app-service-environment
+- azure-logic-apps
 - azure-service-bus
-- azure-key-vault
-- azure-front-door
-urlFragment: azd-ais-lza
-name: Deploy the Azure Integration Services Landing Zone accelerator with Azure Developer CLI
-description: Deploy Azure Integration Services Landing Zone accelerator with Azure Developer CLI to create a secure and scalable environment for your integration services. The accelerator includes best practices for security, network isolation, monitoring, and more.
+- azure-api-management
+urlFragment: azd-ais-async
+name: Deploy an Asynchronous Pattern to the azd-ais-lza with Azure Developer CLI
+description: Deploy an Asynchronous Pattern to the azd-ais-lza with Azure Developer CLI to demonstrate an automated deployment of an Integration Pattern to an Azure Integration Services Landingzone. The integration landingzone includes best practices for security, network isolation, monitoring, and more.
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
-[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=lightgrey&logo=github)](https://codespaces.new/Azure/azd-ais-lza)
-[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev+Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Azure/azd-ais-lza)
+[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=lightgrey&logo=github)](https://codespaces.new/Azure/azd-ais-async)
+[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev+Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Azure/azd-ais-async)
 
 <!--
 Available as template on:
 [![Awesome Badge](https://awesome.re/badge-flat2.svg)](https://aka.ms/awesome-azd)
 `azd`
 -->
-# Deploy Azure Integration Services Landing Zone Accelerator with Azure Developer CLI
+# Deploy an Asynchronous Pattern to the azd-ais-lza with Azure Developer CLI
 
-Deploy Azure Integration Services Landing Zone accelerator with Azure Developer CLI to create a secure and scalable environment for your integration services. The accelerator includes best practices for security, network isolation, monitoring, and more. This repository can be used as a template for deploying integration patterns on Azure. Depending on your preference, for example: I want to deploy Logic Apps in a ASEv3 because I need VNET isolation, you set deployAse in `azd up` to 'true'. The same applies to Azure Front Door, Service Bus and Redis Cache. 
+Deploy an Asynchronous Pattern to the [azd-ais-lza with](https://github.com/pascalvanderheiden/azd-ais-lza) Azure Developer CLI to demonstrate an automated deployment of an Integration Pattern to an Azure Integration Services Landingzone. The integration landingzone includes best practices for security, network isolation, monitoring, and more.
+
+Based on the choices made during the Landingzone deployment (like deploying Azure Frontdoor, Application Service Environment v3, Azure Service Bus), the Asynchronous Pattern will be deployed to the Landingzone. The Asynchronous Pattern includes an Azure Logic App with multiple workflows, Azure Service Bus Queues, CosmosDB as an ODS, and APIs in Azure API Management.
 
 ## Key features
 
 - **Infrastructure-as-code**: Bicep templates for provisioning and deploying the resources.
 - **Secure Access Management**: Best practices and configurations for managing secure access to Azure Integration Services.
 - **Monitoring**: Solutions for tracking and monitoring Azure Integration Services.
-- **End-to-end sample**: Including dashboards, policies, isolation, and more.
+- **End-to-end sample**: Deployment of an Asynchronous Pattern from beginning to end.
 
 ## Architecture
 
-![azd-ais-lza](docs/images/arch.png)
+### Azure Integration Services Landingzone Accelerator
+![azd-ais-async](docs/images/arch_lza.png)
+
+### Asynchronous Pattern
+![azd-ais-async](docs/images/arch_async.png)
 Read more: [Architecture in detail](#architecture-in-detail)
 
 ## Assets
@@ -65,7 +62,7 @@ Read more: [Architecture in detail](#architecture-in-detail)
 ### 1. Initialize a new `azd` environment
 
 ```shell
-azd init -t pascalvanderheiden/azd-ais-lza
+azd init -t pascalvanderheiden/azd-ais-async
 ```
 
 If you already cloned this repository to your local machine or run from a Dev Container or GitHub Codespaces you can run the following command from the root folder.
@@ -86,7 +83,9 @@ azd auth login
 azd up
 ```
 
-It will prompt you to login, pick a subscription, and provide a location (like "eastus"). We've added extra conditional parameters to deploy: Azure Frontdoor, Application Service Environment v3, Azure Service Bus and Redis Cache. Then it will provision the resources in your account. These choices can vary per organization, that is why they are optional.
+It will prompt you to login, pick a subscription, and provide a location (like "eastus"). We've added extra conditional parameters to determine to which infrastructure services you want to deploy. For example, Azure Service Bus is an optional service that you can choose to deploy or not in the Landingzone. For this pattern, the Service Bus service is required. This pattern will not deploy an instance of Service Bus, but you'll need to have it deployed in the Landingzone. The same applies to the App Service Environment v3, if you have chosen to deploy Logic Apps to an isolated environment, this App Service Plan will be used. Otherwise, the Logic Apps will be deployed to the "public, but shielded off from the internet" App Service Plan.
+
+```shell 
 
 For more details on the deployed services, see [additional details](#additional-details) below.
 
@@ -96,35 +95,15 @@ The conditional parameters set in the `azd up` command are stored in the .azure\
 {
   "infra": {
     "parameters": {
-      "deployApimDevPortal": "<true or false>",
-      "deployAse": "<true or false>",
-      "deployFrontDoor": "<true or false>",
-      "deployServiceBus": "<true or false>",
-      "deployRedisCache": "<true or false>"
+      "serviceBusNamespaceLza": "<service bus namespace name of the integration landingzone>>",
+      "appServicePlanLza": "<app service plan name of the integration landingzone>>",
+      "resourceGroupNameLza": "<resource group name of the integration landingzone>"
+      "apiManagementNameLza": "<api management name of the integration landingzone>"
+      "frontDoorNameLza": "<front door name of the integration landingzone>"
     }
   }
 }
 ```
-
-> [!NOTE]  
-> Sometimes the DNS zones for the private endpoints aren't created correctly / in time. If you get an error when you deploy the resources, you can try to deploy the resources again.
-
-> [!NOTE]
-> Deployment of Azure Redis Cache can take up to 30 minutes.
-
-> [!NOTE]
-> Deployment of App Service Environment v3 can take up to 3 hours!
-
-### 3. Environment variables
-
-In the azd template, we automatically set an environment variable for your current IP address. During deployment, this allows traffic from your local machine to the Storage Account for deploying Logic Apps and Function Apps. If you want to use a different IP address, you can set the MY_IP_ADDRESS environment variable.
-
-```shell
-azd env set MY_IP_ADDRESS '<your-ip-address>'
-```
-
-> [!NOTE]  
-> To determine your IPv4 address, the service icanhazip.com is being used. To control the IPv4 addresss used directly (without the service), edit the MY_IP_ADDRESS field in the .azure\<name>\.env file. This file is created after azd init. Without a properly configured IP address, azd up will fail.
 
 ## Additional features
 
@@ -148,7 +127,7 @@ You can configure `azd` to provision and deploy resources to your deployment env
 
 The deployed resources include a Log Analytics workspace with an Application Insights based dashboard to measure metrics like server response time and failed requests.
 
-![azd-ais-lza](docs/images/dashboard.png)
+![azd-ais-async](docs/images/dashboard.png)
 
 To open that dashboard, run this command once you've deployed:
 
@@ -168,7 +147,13 @@ The resource group and all the resources will be deleted and you'll not be promp
 
 ### Testing
 
-A [tests.http](tests.http) file with relevant tests you can perform is included, to check if your deployment is successful. You need the 2 subcription keys for Marketing and Finance, created in API Management in order to test the API. You can find more information about how to create subscription keys [here](https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-create-subscriptions#add-a-subscription-key-to-a-user).
+A [tests.http](tests.http) file with relevant tests you can perform is included, to check if your deployment is successful. You need the subcription key, created in API Management in order to test the API. The rest of the names / urls can be fetched from the azd env file here: .azure/<name>/.env or by using this command:
+
+```shell
+azd env get-values
+```
+
+You can find more information about how to create subscription keys [here](https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-create-subscriptions#add-a-subscription-key-to-a-user).
 
 ### Build Status
 
@@ -176,7 +161,7 @@ After forking this repo, you can use this GitHub Action to enable CI/CD for your
 
 | GitHub Action | Status |
 | ----------- | ----------- |
-| `azd` Deploy | [![Deploy](https://github.com/Azure/azd-ais-lza/actions/workflows/azure-dev.yml/badge.svg?branch=main)](https://github.com/Azure/azd-ais-lza/actions/workflows/azure-dev.yml) |
+| `azd` Deploy | [![Deploy](https://github.com/Azure/azd-ais-async/actions/workflows/azure-dev.yml/badge.svg?branch=main)](https://github.com/Azure/azd-ais-async/actions/workflows/azure-dev.yml) |
 
 ## Additional Details
 
@@ -204,14 +189,6 @@ We're also using [Azure Monitor Private Link Scope](https://learn.microsoft.com/
 
 [Managed identities](https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview) allows you to secure communication between services. This is done without having the need for you to manage any credentials.
 
-### Virtual Network
-
-[Azure Virtual Network](https://azure.microsoft.com/en-us/services/virtual-network/) allows you to create a private network in Azure. You can use this to secure communication between services.
-
-### Azure Private DNS Zone
-
-[Azure Private DNS Zone](https://docs.microsoft.com/en-us/azure/dns/private-dns-overview) allows you to create a private DNS zone in Azure. You can use this to resolve hostnames in your private network.
-
 ### Application Insights
 
 [Application Insights](https://azure.microsoft.com/en-us/services/monitor/) allows you to monitor your application. You can use this to monitor the performance of your application.
@@ -219,18 +196,6 @@ We're also using [Azure Monitor Private Link Scope](https://learn.microsoft.com/
 ### Log Analytics
 
 [Log Analytics](https://azure.microsoft.com/en-us/services/monitor/) allows you to collect and analyze telemetry data from your application. You can use this to monitor the performance of your application.
-
-### Azure Monitor Private Link Scope
-
-[Azure Monitor Private Link Scope](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/private-link-security#configure-access-to-your-resources) allows you to define the boundaries of your monitoring network, and only allow traffic from within that network to your Log Analytics workspace. This is a great way to secure your monitoring network.
-
-### Private Endpoint
-
-[Azure Private Endpoint](https://docs.microsoft.com/en-us/azure/private-link/private-endpoint-overview) allows you to connect privately to a service powered by Azure Private Link. Private Endpoint uses a private IP address from your VNet, effectively bringing the service into your VNet.
-
-### Azure Redis Cache
-
-[Azure Redis Cache](https://azure.microsoft.com/en-us/services/cache/) allows you to use a secure open source Redis cache. Read this on how we [enable Azure Redis Cache to improve the performance of Azure API Management](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-cache-external).
 
 ### Azure Service Bus
 
@@ -251,3 +216,11 @@ We're also using [Azure Monitor Private Link Scope](https://learn.microsoft.com/
 ### Azure Storage
 
 [Azure Storage](https://azure.microsoft.com/en-us/services/storage/) allows you to store your data in a secure way.
+
+### Azure Cosmos DB
+
+[Azure Cosmos DB](https://azure.microsoft.com/en-us/services/cosmos-db/) allows you to store your data in a secure way.
+
+### Azure Logic Apps
+
+[Azure Logic Apps](https://azure.microsoft.com/en-us/services/logic-apps/) allows you to automate your workflows.
