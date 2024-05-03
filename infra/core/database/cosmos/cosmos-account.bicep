@@ -3,8 +3,9 @@ param name string
 param location string = resourceGroup().location
 param tags object = {}
 
-param connectionStringKey string = 'AZURE-COSMOS-CONNECTION-STRING'
+param cosmosDbConnectionStringSecretName string
 param keyVaultName string
+param lzaResourceGroup string
 
 @allowed([ 'GlobalDocumentDB', 'MongoDB', 'Parse' ])
 param kind string
@@ -13,7 +14,7 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' = {
   name: name
   kind: kind
   location: location
-  tags: tags
+  tags: union(tags, { 'azd-service-name': name })
   properties: {
     consistencyPolicy: { defaultConsistencyLevel: 'Session' }
     locations: [
@@ -31,19 +32,16 @@ resource cosmos 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' = {
   }
 }
 
-resource cosmosConnectionString 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  parent: keyVault
-  name: connectionStringKey
-  properties: {
-    value: cosmos.listConnectionStrings().connectionStrings[0].connectionString
+module cosmosDbConnectionString '../../keyvault/keyvault-secret.bicep' = {
+  name: 'cosmosdb-connection-string'
+  scope: resourceGroup(lzaResourceGroup)
+  params: {
+    keyVaultName: keyVaultName
+    secretName: cosmosDbConnectionStringSecretName
+    secretValue: cosmos.listConnectionStrings().connectionStrings[0].connectionString
   }
 }
 
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: keyVaultName
-}
-
-output connectionStringKey string = connectionStringKey
 output endpoint string = cosmos.properties.documentEndpoint
 output id string = cosmos.id
 output name string = cosmos.name

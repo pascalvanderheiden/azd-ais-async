@@ -4,6 +4,8 @@ param location string = resourceGroup().location
 param tags object = {}
 
 param keyVaultName string
+param cosmosDbConnectionStringSecretName string
+param lzaResourceGroup string
 
 module cosmos '../../cosmos/cosmos-account.bicep' = {
   name: 'cosmos-account'
@@ -13,10 +15,11 @@ module cosmos '../../cosmos/cosmos-account.bicep' = {
     tags: tags
     keyVaultName: keyVaultName
     kind: 'GlobalDocumentDB'
+    lzaResourceGroup: lzaResourceGroup
+    cosmosDbConnectionStringSecretName: cosmosDbConnectionStringSecretName
   }
 }
 
-output connectionStringKey string = cosmos.outputs.connectionStringKey
 output endpoint string = cosmos.outputs.endpoint
 output id string = cosmos.outputs.id
 output name string = cosmos.outputs.name

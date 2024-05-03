@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "APP_KIND": "workflowapp",
+    "ProjectDirectoryPath": "/Users/pascalvanderheiden/Documents/GitHub/azd-ais-async/src",
+    "FUNCTIONS_WORKER_RUNTIME": "node"
+  }
+}
