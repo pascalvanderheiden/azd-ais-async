@@ -433,4 +433,4 @@ next-env.d.ts
 
 # workflows
 src/workflow-designtime
-src/local-settings.json
+src/local.settings.json
