@@ -25,7 +25,7 @@ resource serviceBusQueue 'Microsoft.ServiceBus/namespaces/queues@2022-01-01-prev
     enableExpress: false
   }
 }
-
+/*
 resource laManagedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
   name: laManagedIdentityName
 }
@@ -49,7 +49,7 @@ module sbSenderRoleAssignment '../roleassignments/roleassignment.bicep' = {
     deploymentName: 'sb-la-roleAssignment-DataSender'
   }
 }
-
+*/
 output serviceBusNamespaceName string =  serviceBus.name
 output serviceBusNamespaceFullQualifiedName string = '${serviceBus.name}.servicebus.windows.net'
 output serviceBusQueueName string = serviceBusQueue.name

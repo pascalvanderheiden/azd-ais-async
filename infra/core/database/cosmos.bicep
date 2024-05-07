@@ -11,9 +11,9 @@ param keyVaultName string
 
 var defaultConsistencyLevel = 'Session'
 
-resource logicAppsIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
-  name: logicAppsIdentityName
-}
+//resource logicAppsIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
+//  name: logicAppsIdentityName
+//}
 
 resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
   name: toLower(name)
@@ -27,7 +27,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
       {
         locationName: location
         failoverPriority: 0
-        isZoneRedundant: true
+        isZoneRedundant: false
       }
     ]
     disableKeyBasedMetadataWriteAccess: true
@@ -50,7 +50,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
 }
 
 resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
-  name: 'cosmosdb-database'
+  name: cosmosDbDatabaseName
   parent: account
   properties:{
     resource: {
@@ -60,7 +60,7 @@ resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15
 }
 
 resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-05-15' = {
-  name: 'cosmosdb-container'
+  name: cosmosDbContainerName
   parent: database
   properties:{
     resource: {
@@ -74,10 +74,11 @@ resource container 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/container
     }
   }
 }
-
+/*
 var CosmosDBBuiltInDataContributor = {
   id: '/subscriptions/${subscription().subscriptionId}/resourceGroups/${resourceGroup().name}/providers/Microsoft.DocumentDB/databaseAccounts/${account.name}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002'
 }
+
 resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = {
   name: guid(account.name, CosmosDBBuiltInDataContributor.id, logicAppsIdentityName)
   parent: account
@@ -87,6 +88,7 @@ resource sqlRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignm
     scope: account.id
   }
 }
+
 resource sqlRoleAssignmentCurrentUser 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-11-15' = {
   name: guid(account.name,CosmosDBBuiltInDataContributor.id, myPrincipalId)
   parent: account
@@ -96,7 +98,7 @@ resource sqlRoleAssignmentCurrentUser 'Microsoft.DocumentDB/databaseAccounts/sql
     scope: account.id
   }
 }
-
+*/
 var cosmosConnectionString = account.listConnectionStrings().connectionStrings[0].connectionString
 module keyvaultSecretConnectionString '../keyvault/keyvault-secret.bicep' = {
   name: '${account.name}-connectionstring-deployment-keyvault'

@@ -23,7 +23,15 @@ param resourceGroupNameLza string
     type: 'string'
   }
 })
-param serviceBusNamespaceLza string
+param serviceBusNamespaceNameLza string
+
+@description('Storage Account name of the Integration Landingzone deployment.')
+@metadata({
+  azd: {
+    type: 'string'
+  }
+})
+param storageAccountNameLza string
 
 @description('App Service Plan name of the Integration Landingzone deployment.')
 @metadata({
@@ -31,7 +39,7 @@ param serviceBusNamespaceLza string
     type: 'string'
   }
 })
-param appServicePlanLza string
+param appServicePlanNameLza string
 
 @description('API Management name of the Integration Landingzone deployment.')
 @metadata({
@@ -65,14 +73,17 @@ param appInsightsNameLza string
 })
 param logicAppsSubnetNameLza string
 
-@description('Azure Storage SKU.')
-@allowed(['Standard_LRS','Standard_GRS','Standard_RAGRS','Standard_ZRS','Premium_LRS','Premium_ZRS','Standard_GZRS','Standard_RAGZRS'])
-param storageSku string = 'Standard_LRS'
+@description('Virtual Network name (for non-ASEv3 Logic Apps) of the Integration Landingzone deployment.')
+@metadata({
+  azd: {
+    type: 'string'
+  }
+})
+param vnetNameLza string
 
 //Leave blank to use default naming conventions
 param laIdentityName string = ''
 param cosmosDbAccountName string = ''
-param storageAccountName string = ''
 param logicAppName string = ''
 param myIpAddress string = ''
 param myPrincipalId string = ''
@@ -96,7 +107,7 @@ var laProcessingName = 'processing-customer-wf'
 var customerApiName = 'customer-api'
 var customerApiDisplayName = 'Customer API'
 var customerApiPath = 'customer'
-var customerOpenApiSpecUrl = ''
+var customerOpenApiSpecUrl = 'https://petstore.swagger.io/v2/swagger.json'
 var laName = !empty(logicAppName) ? logicAppName : '${abbrs.logicWorkflows}${resourceToken}'
 
 // Organize resources in a resource group for your integration pattern
@@ -110,6 +121,11 @@ resource lzaResourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' existi
   name: resourceGroupNameLza
 }
 
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+  name: keyVaultNameLza
+  scope: resourceGroup(resourceGroupNameLza)
+}
+
 module managedIdentityLa './core/security/managed-identity.bicep' = {
   name: 'managed-identity-la'
   scope: rg
@@ -120,11 +136,22 @@ module managedIdentityLa './core/security/managed-identity.bicep' = {
   }
 }
 
+module laRoleAssignment './core/roleassignments/roleassignment.bicep' = {
+  name: 'kv-la-roleAssignment'
+  scope: lzaResourceGroup
+  params: {
+    principalId: managedIdentityLa.outputs.managedIdentityPrincipalId
+    roleName: 'Key Vault Secrets User'
+    targetResourceId: keyVault.id
+    deploymentName: 'kv-la-roleAssignment-SecretsUser'
+  }
+}
+
 module serviceBus './core/servicebus/servicebus-queue.bicep' = {
   name: 'servicebus'
   scope: lzaResourceGroup
   params: {
-    name: serviceBusNamespaceLza
+    name: serviceBusNamespaceNameLza
     location: location
     tags: tags
     laManagedIdentityName: managedIdentityLa.outputs.managedIdentityName
@@ -149,14 +176,11 @@ module cosmosDb './core/database/cosmos.bicep' = {
   }
 }
 
-module storage './core/storage/storage.bicep' = {
-  name: 'storage'
-  scope: rg
+module storage './core/storage/storage-fileshare.bicep' = {
+  name: 'storage-fileshare'
+  scope: lzaResourceGroup
   params: {
-    name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageStorageAccounts}${resourceToken}'
-    location: location
-    tags: tags
-    storageSku: storageSku
+    storageAccountName: storageAccountNameLza
     fileShareName: laName
   }
 }
@@ -168,15 +192,20 @@ module logicApp './core/host/logic-apps.bicep' = {
     name: laName
     location: location
     tags: tags
-    keyVaultName: keyVaultNameLza
     lzaResourceGroup: lzaResourceGroup.name
-    storageConnectionStringSecretName: storageConnectionStringSecretName
     appInsightName: appInsightsNameLza
     laManagedIdentityName: managedIdentityLa.outputs.managedIdentityName
-    aspName: appServicePlanLza
+    aspName: appServicePlanNameLza
+    vnetNameLza: vnetNameLza
     logicAppsSubnetNameLza: logicAppsSubnetNameLza
-    storageConnectionString: storage.outputs.storageConnectionString
+    storageConnectionString: keyVault.getSecret(storageConnectionStringSecretName)
   }
+  dependsOn: [
+    managedIdentityLa
+    laRoleAssignment
+    cosmosDb
+    storage
+  ]
 }
 
 module customerApi './core/gateway/apim-api.bicep' = {
