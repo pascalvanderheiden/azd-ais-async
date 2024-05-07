@@ -8,10 +8,7 @@
 				"${input:getDebugSymbolDll}"
 			],
 			"type": "process",
-			"problemMatcher": "$msCompile",
-			"options": {
-				"cwd": "${workspaceFolder}/src"
-			}
+			"problemMatcher": "$msCompile"
 		},
 		{
 			"type": "shell",
@@ -23,8 +20,7 @@
 			"options": {
 				"env": {
 					"PATH": "${config:azureLogicAppsStandard.autoRuntimeDependenciesPath}\\NodeJs;${config:azureLogicAppsStandard.autoRuntimeDependenciesPath}\\DotNetSDK;$env:PATH"
-				},
-				"cwd": "${workspaceFolder}/src"
+				}
 			},
 			"problemMatcher": "$func-watch",
 			"isBackground": true,

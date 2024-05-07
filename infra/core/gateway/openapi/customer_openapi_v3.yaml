@@ -1,0 +1,90 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Customer API
+paths:
+  /customers:
+    post:
+      summary: Create a new customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+            example:
+              customerId: "1234567890"
+              customerName: "John Doe"
+              customerEmail: "johndoe@example.com"
+              customerPhone: "1234567890"
+              customerAddress:
+                street: "123 Main St"
+                city: "Anytown"
+                state: "CA"
+                zip: "12345"
+      responses:
+        '201':
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+              example:
+                customerId: "1234567890"
+                customerName: "John Doe"
+                customerEmail: "johndoe@example.com"
+                customerPhone: "1234567890"
+                customerAddress:
+                  street: "123 Main St"
+                  city: "Anytown"
+                  state: "CA"
+                  zip: "12345"
+    get:
+      summary: Get all customers
+      responses:
+        '200':
+          description: A list of customers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+              example:
+                - customerId: "1234567890"
+                  customerName: "John Doe"
+                  customerEmail: "johndoe@example.com"
+                  customerPhone: "1234567890"
+                  customerAddress:
+                    street: "123 Main St"
+                    city: "Anytown"
+                    state: "CA"
+                    zip: "12345"
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        customerId:
+          type: string
+        customerName:
+          type: string
+        customerEmail:
+          type: string
+        customerPhone:
+          type: string
+        customerAddress:
+          type: object
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            zip:
+              type: string
+      required:
+        - customerId
+        - customerName
+        - customerPhone
