@@ -102,8 +102,6 @@ var cosmosDbConnectionStringSecretName = 'cosmosdb-connection-string'
 var storageConnectionStringSecretName = 'storage-connection-string'
 var serviceBusConnectionStringSecretName = 'servicebus-connection-string'
 var serviceBusQueueName = 'customer'
-var laOrchestrationName = 'orchestration-customer-wf'
-var laProcessingName = 'processing-customer-wf'
 var customerApiName = 'customer-api'
 var customerApiDisplayName = 'Customer API'
 var customerApiPath = 'customer'
@@ -152,9 +150,6 @@ module serviceBus './core/servicebus/servicebus-queue.bicep' = {
   scope: lzaResourceGroup
   params: {
     name: serviceBusNamespaceNameLza
-    location: location
-    tags: tags
-    laManagedIdentityName: managedIdentityLa.outputs.managedIdentityName
     queueName: serviceBusQueueName
   }
 }
@@ -166,9 +161,7 @@ module cosmosDb './core/database/cosmos.bicep' = {
     name: !empty(cosmosDbAccountName) ? cosmosDbAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
     location: location
     lzaResourceGroup: lzaResourceGroup.name
-    logicAppsIdentityName: managedIdentityLa.outputs.managedIdentityName
     myIpAddress: myIpAddress
-    myPrincipalId: myPrincipalId
     cosmosDbDatabaseName: cosmosDbDatabaseName
     cosmosDbContainerName: cosmosDbContainerName
     cosmosDbPartitionKeyPath: cosmosDbPartitionKeyPath
@@ -199,6 +192,10 @@ module logicApp './core/host/logic-apps.bicep' = {
     vnetNameLza: vnetNameLza
     logicAppsSubnetNameLza: logicAppsSubnetNameLza
     storageConnectionString: keyVault.getSecret(storageConnectionStringSecretName)
+    serviceBusNamespaceName: serviceBusNamespaceNameLza
+    serviceBusConnectionString: keyVault.getSecret(serviceBusConnectionStringSecretName)
+    cosmosDbName: cosmosDb.outputs.cosmosDbAccountName
+    cosmosDbConnectionString: keyVault.getSecret(cosmosDbConnectionStringSecretName)
   }
   dependsOn: [
     managedIdentityLa

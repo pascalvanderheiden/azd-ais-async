@@ -1,0 +1,12 @@
+{
+    "customerId": "1234567890",
+    "customerName": "John Doe",
+    "customerEmail": "",
+    "customerPhone": "1234567890",
+    "customerAddress": {
+        "street": "123 Main St",
+        "city": "Anytown",
+        "state": "CA",
+        "zip": "12345"
+    }
+}

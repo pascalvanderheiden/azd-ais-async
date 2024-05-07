@@ -1,10 +1,206 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "actions": {},
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "triggers": {}
-  },
-  "kind": "Stateless"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Parse_JSON": {
+                "type": "ParseJson",
+                "inputs": {
+                    "content": "@triggerBody()?['contentData']",
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "method": {
+                                "type": "string"
+                            },
+                            "message": {
+                                "type": "object",
+                                "properties": {
+                                    "customerId": {
+                                        "type": "string"
+                                    },
+                                    "customerName": {
+                                        "type": "string"
+                                    },
+                                    "customerEmail": {
+                                        "type": "string"
+                                    },
+                                    "customerPhone": {
+                                        "type": "string"
+                                    },
+                                    "customerAddress": {
+                                        "type": "object",
+                                        "properties": {
+                                            "street": {
+                                                "type": "string"
+                                            },
+                                            "city": {
+                                                "type": "string"
+                                            },
+                                            "state": {
+                                                "type": "string"
+                                            },
+                                            "zip": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "runAfter": {}
+            },
+            "Switch_on_method": {
+                "type": "Switch",
+                "expression": "@body('Parse_JSON')?['method']",
+                "default": {
+                    "actions": {}
+                },
+                "cases": {
+                    "Case_-_Post": {
+                        "actions": {
+                            "Create_item": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "databaseId": "ods",
+                                        "containerId": "customer",
+                                        "item": "@body('Parse_JSON')?['message']",
+                                        "isUpsert": false
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "AzureCosmosDB",
+                                        "operationId": "CreateOrUpdateDocument",
+                                        "serviceProviderId": "/serviceProviders/AzureCosmosDB"
+                                    }
+                                }
+                            },
+                            "Complete_the_message_-_Post": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "messageId": "@item()?['messageId']"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "serviceBus",
+                                        "operationId": "completeMessage",
+                                        "serviceProviderId": "/serviceProviders/serviceBus"
+                                    }
+                                },
+                                "runAfter": {
+                                    "Create_item": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            }
+                        },
+                        "case": "POST"
+                    },
+                    "Case_-_Patch": {
+                        "actions": {
+                            "Update_item": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "databaseId": "ods",
+                                        "containerId": "customer",
+                                        "item": "@body('Parse_JSON')?['message']",
+                                        "isUpsert": true
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "AzureCosmosDB",
+                                        "operationId": "CreateOrUpdateDocument",
+                                        "serviceProviderId": "/serviceProviders/AzureCosmosDB"
+                                    }
+                                }
+                            },
+                            "Complete_the_message_-_Patch": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "messageId": "@item()?['messageId']"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "serviceBus",
+                                        "operationId": "completeMessage",
+                                        "serviceProviderId": "/serviceProviders/serviceBus"
+                                    }
+                                },
+                                "runAfter": {
+                                    "Update_item": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            }
+                        },
+                        "case": "PATH"
+                    },
+                    "Case_-_Delete": {
+                        "actions": {
+                            "Delete_an_item": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "databaseId": "ods",
+                                        "containerId": "customer",
+                                        "itemId": "@body('Parse_JSON')?['message']?['customerId']",
+                                        "partitionKey": "customerId"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "AzureCosmosDB",
+                                        "operationId": "DeleteDocument",
+                                        "serviceProviderId": "/serviceProviders/AzureCosmosDB"
+                                    }
+                                }
+                            },
+                            "Complete_the_message_-_Delete": {
+                                "type": "ServiceProvider",
+                                "inputs": {
+                                    "parameters": {
+                                        "messageId": "@item()?['messageId']"
+                                    },
+                                    "serviceProviderConfiguration": {
+                                        "connectionName": "serviceBus",
+                                        "operationId": "completeMessage",
+                                        "serviceProviderId": "/serviceProviders/serviceBus"
+                                    }
+                                },
+                                "runAfter": {
+                                    "Delete_an_item": [
+                                        "SUCCEEDED"
+                                    ]
+                                }
+                            }
+                        },
+                        "case": "DELETE"
+                    }
+                },
+                "runAfter": {
+                    "Parse_JSON": [
+                        "SUCCEEDED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_messages_are_available_in_a_queue": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "queueName": "customer",
+                        "isSessionsEnabled": false
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "receiveQueueMessages",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                }
+            }
+        }
+    },
+    "kind": "Stateless"
 }

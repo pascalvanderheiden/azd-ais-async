@@ -1,10 +1,106 @@
 {
-  "definition": {
-    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
-    "actions": {},
-    "contentVersion": "1.0.0.0",
-    "outputs": {},
-    "triggers": {}
-  },
-  "kind": "Stateless"
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Compose_Service_Bus_Message": {
+                "type": "Compose",
+                "inputs": {
+                    "method": "@{triggerOutputs()?['headers']?['method']}",
+                    "message": "@{triggerBody()}"
+                },
+                "runAfter": {}
+            },
+            "Send_message": {
+                "type": "ServiceProvider",
+                "inputs": {
+                    "parameters": {
+                        "entityName": "customer",
+                        "message": {
+                            "contentData": "@outputs('Compose_Service_Bus_Message')"
+                        }
+                    },
+                    "serviceProviderConfiguration": {
+                        "connectionName": "serviceBus",
+                        "operationId": "sendMessage",
+                        "serviceProviderId": "/serviceProviders/serviceBus"
+                    }
+                },
+                "runAfter": {
+                    "Compose_Service_Bus_Message": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response_Successful": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 200
+                },
+                "runAfter": {
+                    "Send_message": [
+                        "SUCCEEDED"
+                    ]
+                }
+            },
+            "Response_Failed": {
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                    "statusCode": 500
+                },
+                "runAfter": {
+                    "Send_message": [
+                        "TIMEDOUT",
+                        "FAILED"
+                    ]
+                }
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "triggers": {
+            "When_a_HTTP_request_is_received": {
+                "type": "Request",
+                "kind": "Http",
+                "inputs": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "customerId": {
+                                "type": "string"
+                            },
+                            "customerName": {
+                                "type": "string"
+                            },
+                            "customerEmail": {
+                                "type": "string"
+                            },
+                            "customerPhone": {
+                                "type": "string"
+                            },
+                            "customerAddress": {
+                                "type": "object",
+                                "properties": {
+                                    "street": {
+                                        "type": "string"
+                                    },
+                                    "city": {
+                                        "type": "string"
+                                    },
+                                    "state": {
+                                        "type": "string"
+                                    },
+                                    "zip": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "kind": "Stateless"
 }

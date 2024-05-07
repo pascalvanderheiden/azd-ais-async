@@ -1,0 +1,24 @@
+{
+  "serviceProviderConnections": {
+    "serviceBus": {
+      "parameterValues": {
+        "connectionString": "@appsetting('serviceBus_connectionString')"
+      },
+      "parameterSetName": "connectionString",
+      "serviceProvider": {
+        "id": "/serviceProviders/serviceBus"
+      },
+      "displayName": "@appsetting('serviceBus_name')"
+    },
+    "AzureCosmosDB": {
+      "parameterValues": {
+        "connectionString": "@appsetting('cosmosDB_connectionString')"
+      },
+      "serviceProvider": {
+        "id": "/serviceProviders/AzureCosmosDB"
+      },
+      "displayName": "@appsetting('cosmosDB_name')"
+    }
+  },
+  "managedApiConnections": {}
+}

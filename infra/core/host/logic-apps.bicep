@@ -4,6 +4,12 @@ param tags object = {}
 param lzaResourceGroup string
 @secure()
 param storageConnectionString string
+@secure()
+param serviceBusConnectionString string
+param serviceBusNamespaceName string
+@secure()
+param cosmosDbConnectionString string
+param cosmosDbName string
 param appInsightName string
 param aspName string
 param laManagedIdentityName string
@@ -80,6 +86,10 @@ resource logicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
           { name: 'WEBSITE_VNET_ROUTE_ALL', value: '1'}
           { name: 'WEBSITE_DNS_SERVER', value: '168.63.129.16'}
           { name: 'Workflows.my-workflow.FlowState', value: 'Enabled' }
+          { name: 'serviceBus_name', value: serviceBusNamespaceName }
+          { name: 'serviceBus_connectionString', value: serviceBusConnectionString }
+          { name: 'cosmosDb_name', value: cosmosDbName }
+          { name: 'cosmosDb_connectionString', value: cosmosDbConnectionString }
       ]
   }
 }
