@@ -57,9 +57,25 @@ param keyVaultNameLza string
 })
 param appInsightsNameLza string
 
+@description('Logic Apps Virtual Network Subnet name (for non-ASEv3 Logic Apps) of the Integration Landingzone deployment.')
+@metadata({
+  azd: {
+    type: 'string'
+  }
+})
+param logicAppsSubnetNameLza string
+
+@description('Azure Storage SKU.')
+@allowed(['Standard_LRS','Standard_GRS','Standard_RAGRS','Standard_ZRS','Premium_LRS','Premium_ZRS','Standard_GZRS','Standard_RAGZRS'])
+param storageSku string = 'Standard_LRS'
+
 //Leave blank to use default naming conventions
 param laIdentityName string = ''
 param cosmosDbAccountName string = ''
+param storageAccountName string = ''
+param logicAppName string = ''
+param myIpAddress string = ''
+param myPrincipalId string = ''
 
 // tags that should be applied to all resources.
 var tags = { 'azd-env-name': environmentName }
@@ -68,22 +84,20 @@ var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 
 // vars specific to pattern
-var cosmosDbDatabaseName = 'customers'
+var cosmosDbDatabaseName = 'ods'
+var cosmosDbContainerName = 'customer'
+var cosmosDbPartitionKeyPath = '/customerId'
 var cosmosDbConnectionStringSecretName = 'cosmosdb-connection-string'
 var storageConnectionStringSecretName = 'storage-connection-string'
-var serviceBusQueueName = 'customers'
+var serviceBusConnectionStringSecretName = 'servicebus-connection-string'
+var serviceBusQueueName = 'customer'
 var laOrchestrationName = 'orchestration-customer-wf'
 var laProcessingName = 'processing-customer-wf'
-var cosmosDbContainerDef = [
-  {
-    name: 'customers'
-    partitionKeyPath: '/id'
-  }
-]
 var customerApiName = 'customer-api'
 var customerApiDisplayName = 'Customer API'
 var customerApiPath = 'customer'
 var customerOpenApiSpecUrl = ''
+var laName = !empty(logicAppName) ? logicAppName : '${abbrs.logicWorkflows}${resourceToken}'
 
 // Organize resources in a resource group for your integration pattern
 resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -118,21 +132,32 @@ module serviceBus './core/servicebus/servicebus-queue.bicep' = {
   }
 }
 
-module cosmosDb './core/database/cosmos/sql/cosmos-sql-db.bicep' = {
+module cosmosDb './core/database/cosmos.bicep' = {
   name: 'cosmosdb'
   scope: rg
   params: {
-    accountName: !empty(cosmosDbAccountName) ? cosmosDbAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
-    databaseName: cosmosDbDatabaseName
+    name: !empty(cosmosDbAccountName) ? cosmosDbAccountName : '${abbrs.documentDBDatabaseAccounts}${resourceToken}'
+    location: location
+    lzaResourceGroup: lzaResourceGroup.name
+    logicAppsIdentityName: managedIdentityLa.outputs.managedIdentityName
+    myIpAddress: myIpAddress
+    myPrincipalId: myPrincipalId
+    cosmosDbDatabaseName: cosmosDbDatabaseName
+    cosmosDbContainerName: cosmosDbContainerName
+    cosmosDbPartitionKeyPath: cosmosDbPartitionKeyPath
+    keyVaultName: keyVaultNameLza
+  }
+}
+
+module storage './core/storage/storage.bicep' = {
+  name: 'storage'
+  scope: rg
+  params: {
+    name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageStorageAccounts}${resourceToken}'
     location: location
     tags: tags
-    keyVaultName: keyVaultNameLza
-    lzaResourceGroup: lzaResourceGroup.name
-    cosmosDbConnectionStringSecretName: cosmosDbConnectionStringSecretName
-    containers: cosmosDbContainerDef
-    principalIds: [
-      managedIdentityLa.outputs.managedIdentityPrincipalId
-    ]
+    storageSku: storageSku
+    fileShareName: laName
   }
 }
 
@@ -140,7 +165,7 @@ module logicApp './core/host/logic-apps.bicep' = {
   name: 'logicapp'
   scope: rg
   params: {
-    name: customerApiName
+    name: laName
     location: location
     tags: tags
     keyVaultName: keyVaultNameLza
@@ -149,7 +174,8 @@ module logicApp './core/host/logic-apps.bicep' = {
     appInsightName: appInsightsNameLza
     laManagedIdentityName: managedIdentityLa.outputs.managedIdentityName
     aspName: appServicePlanLza
-
+    logicAppsSubnetNameLza: logicAppsSubnetNameLza
+    storageConnectionString: storage.outputs.storageConnectionString
   }
 }
 
