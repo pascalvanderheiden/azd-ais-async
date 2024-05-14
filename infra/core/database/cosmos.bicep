@@ -1,11 +1,13 @@
 param name string
 param location string
+param tags object = {}
 param myIpAddress string = ''
 param cosmosDbDatabaseName string
 param cosmosDbContainerName string
 param cosmosDbPartitionKeyPath string
 param lzaResourceGroup string
 param keyVaultName string
+param cosmosDbConnectionStringSecretName string
 
 var defaultConsistencyLevel = 'Session'
 
@@ -13,6 +15,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
   name: toLower(name)
   kind: 'GlobalDocumentDB'
   location: location
+  tags: union(tags, { 'azd-service-name': name })
   properties: {
     consistencyPolicy: {
       defaultConsistencyLevel: defaultConsistencyLevel
@@ -45,6 +48,7 @@ resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
 resource database 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-05-15' = {
   name: cosmosDbDatabaseName
   parent: account
+  tags: union(tags, { 'azd-service-name': cosmosDbDatabaseName })
   properties:{
     resource: {
       id: cosmosDbDatabaseName
@@ -74,7 +78,7 @@ module keyvaultSecretConnectionString '../keyvault/keyvault-secret.bicep' = {
   scope: resourceGroup(lzaResourceGroup)
   params: {
     keyVaultName: keyVaultName
-    secretName: 'cosmos-connection-string'
+    secretName: cosmosDbConnectionStringSecretName
     secretValue: cosmosDbConnectionString
   }
 }

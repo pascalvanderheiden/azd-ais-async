@@ -410,8 +410,7 @@ FodyWeavers.xsd
 # Local Test scripts
 local.tests.http
 
-# Azurechat / Node.js with Next
-# next.js
+# Node.js with Next
 **/.next/
 **/out/
 

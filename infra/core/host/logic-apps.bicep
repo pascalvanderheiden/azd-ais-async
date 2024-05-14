@@ -16,6 +16,7 @@ param laManagedIdentityName string
 param vnetNameLza string
 param logicAppsSubnetNameLza string
 param allowedOrigins array = []
+param myIpAddress string = ''
 
 resource appInsight 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightName
@@ -49,16 +50,17 @@ resource logicApp 'Microsoft.Web/sites@2022-03-01' = {
       '${managedIdentityLa.id}': {}
     }
   }
-  tags: union(tags, { 'azd-service-name': name })
+  tags: tags
   properties: {
       httpsOnly: true
       vnetRouteAllEnabled: true
       vnetContentShareEnabled: true
       storageAccountRequired: true
-      publicNetworkAccess: 'Disabled'
+      publicNetworkAccess: 'Enabled'
       virtualNetworkSubnetId: vnet::subnet.id
       serverFarmId: appServicePlan.id
       clientAffinityEnabled: false
+      keyVaultReferenceIdentity: managedIdentityLa.id
   }
 }
 
@@ -71,6 +73,18 @@ resource logicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
       cors: {
         allowedOrigins: union([ 'https://portal.azure.com', 'https://ms.portal.azure.com' ], allowedOrigins)
       }
+      publicNetworkAccess: 'Enabled'
+      ipSecurityRestrictions: []
+      IpSecurityRestrictionsDefaultAction: 'Deny'
+      scmIpSecurityRestrictions: [
+        {
+          name: 'AllowLocalDeployment'
+          priority: 100
+          ipAddress: '${myIpAddress}/32' //for local development
+          action: 'Allow'
+        }
+      ]
+      scmIpSecurityRestrictionsDefaultAction: 'Deny'
       appSettings: [
           { name: 'APP_KIND', value: 'workflowApp' }
           { name: 'APPINSIGHTS_INSTRUMENTATIONKEY', value: appInsight.properties.InstrumentationKey }
@@ -94,3 +108,6 @@ resource logicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   }
 }
 
+output logicAppsName string = logicApp.name
+output logicAppsId string = logicApp.id
+output logicAppsDefaultHostname string = logicApp.properties.defaultHostName

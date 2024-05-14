@@ -1,10 +1,21 @@
 <policies>
     <inbound>
         <base/>
-        <set-backend-service backend-id="sap-backend" />
-        <set-header name="APIKey" exists-action="override">
-            <value>{{sap-apikey}}</value>
-        </set-header>
+        <set-header name="api-key" exists-action="delete" />
+        <set-backend-service id="logicapp-backend-policy" backend-id="__laName__" />
+        <rewrite-uri template="__workflowName__/triggers/__workflowTrigger__/invoke" />
+        <set-query-parameter name="api-version" exists-action="append">
+            <value>{{__api-version__}}</value>
+        </set-query-parameter>
+        <set-query-parameter name="sp" exists-action="append">
+            <value>{{__sp__}}</value>
+        </set-query-parameter>
+        <set-query-parameter name="sv" exists-action="append">
+            <value>{{__sv__}}</value>
+        </set-query-parameter>
+        <set-query-parameter name="sig" exists-action="append">
+            <value>{{__sig__}}</value>
+        </set-query-parameter>
     </inbound>
     <backend>
         <base/>

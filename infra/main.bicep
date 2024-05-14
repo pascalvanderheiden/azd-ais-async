@@ -84,9 +84,9 @@ param vnetNameLza string
 //Leave blank to use default naming conventions
 param laIdentityName string = ''
 param cosmosDbAccountName string = ''
-param logicAppName string = ''
+param logicAppsName string = ''
 param myIpAddress string = ''
-param myPrincipalId string = ''
+//param myPrincipalId string = ''
 
 // tags that should be applied to all resources.
 var tags = { 'azd-env-name': environmentName }
@@ -95,6 +95,13 @@ var abbrs = loadJsonContent('./abbreviations.json')
 var resourceToken = toLower(uniqueString(subscription().id, environmentName, location))
 
 // vars specific to pattern
+var laName = !empty(logicAppsName) ? logicAppsName : '${abbrs.logicWorkflows}${resourceToken}'
+var laOrchestrationCustomerWorkflow = 'orchestration-customer-wf'
+var laOrchestrationCustomerWorkflowTrigger = 'When_a_HTTP_request_is_received'
+var laOrchestrationCustomerWorkflowApiVersionNamedValue = 'orchestration-customer-wf-api-version'
+var laOrchestrationCustomerWorkflowSpNamedValue = 'orchestration-customer-wf-sp'
+var laOrchestrationCustomerWorkflowSvNamedValue = 'orchestration-customer-wf-sv'
+var laOrchestrationCustomerWorkflowSigNamedValue = 'orchestration-customer-wf-sig'
 var cosmosDbDatabaseName = 'ods'
 var cosmosDbContainerName = 'customer'
 var cosmosDbPartitionKeyPath = '/customerId'
@@ -105,8 +112,38 @@ var serviceBusQueueName = 'customer'
 var customerApiName = 'customer-api'
 var customerApiDisplayName = 'Customer API'
 var customerApiPath = 'customer'
-var customerOpenApiSpecUrl = 'https://petstore.swagger.io/v2/swagger.json'
-var laName = !empty(logicAppName) ? logicAppName : '${abbrs.logicWorkflows}${resourceToken}'
+var customerApiPolicyRaw = loadTextContent('../infra/core/gateway/policies/api-policy.xml')
+var apimPolicyLaName = replace(customerApiPolicyRaw, '__laName__', laName)
+var apimPolicyWorkflowName = replace(apimPolicyLaName, '__workflowName__', laOrchestrationCustomerWorkflow)
+var apimPolicyWorkflowTrigger = replace(apimPolicyWorkflowName, '__workflowTrigger__', laOrchestrationCustomerWorkflowTrigger)
+var apimPolicyWorkflowApiVersion = replace(apimPolicyWorkflowTrigger, '__api-version__', laOrchestrationCustomerWorkflowApiVersionNamedValue)
+var apimPolicyWorkflowSp = replace(apimPolicyWorkflowApiVersion, '__sp__', laOrchestrationCustomerWorkflowSpNamedValue)
+var apimPolicyWorkflowSv = replace(apimPolicyWorkflowSp, '__sv__', laOrchestrationCustomerWorkflowSvNamedValue)
+var apimPolicyWorkflowSig = replace(apimPolicyWorkflowSv, '__sig__', laOrchestrationCustomerWorkflowSigNamedValue)
+var apimAPIPolicyReplaced = apimPolicyWorkflowSig
+var customerApiDefinition = '../infra/core/gateway/openapi/customer_openapi_v3.yaml'
+var customerNamedValues = [
+  {
+    key: laOrchestrationCustomerWorkflowApiVersionNamedValue
+    value: 'placeholder'
+    secret: false
+  }
+  {
+    key: laOrchestrationCustomerWorkflowSpNamedValue
+    value: 'placeholder'
+    secret: false
+  }
+  {
+    key: laOrchestrationCustomerWorkflowSvNamedValue
+    value: 'placeholder'
+    secret: false
+  }
+  {
+    key: laOrchestrationCustomerWorkflowSigNamedValue
+    value: 'placeholder'
+    secret: true
+  }
+]
 
 // Organize resources in a resource group for your integration pattern
 resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -166,6 +203,7 @@ module cosmosDb './core/database/cosmos.bicep' = {
     cosmosDbContainerName: cosmosDbContainerName
     cosmosDbPartitionKeyPath: cosmosDbPartitionKeyPath
     keyVaultName: keyVaultNameLza
+    cosmosDbConnectionStringSecretName: cosmosDbConnectionStringSecretName
   }
 }
 
@@ -184,7 +222,7 @@ module logicApp './core/host/logic-apps.bicep' = {
   params: {
     name: laName
     location: location
-    tags: tags
+    tags: union(tags, { 'azd-service-name': 'api' })
     lzaResourceGroup: lzaResourceGroup.name
     appInsightName: appInsightsNameLza
     laManagedIdentityName: managedIdentityLa.outputs.managedIdentityName
@@ -196,6 +234,7 @@ module logicApp './core/host/logic-apps.bicep' = {
     serviceBusConnectionString: keyVault.getSecret(serviceBusConnectionStringSecretName)
     cosmosDbName: cosmosDb.outputs.cosmosDbAccountName
     cosmosDbConnectionString: keyVault.getSecret(cosmosDbConnectionStringSecretName)
+    myIpAddress: myIpAddress
   }
   dependsOn: [
     managedIdentityLa
@@ -212,11 +251,26 @@ module customerApi './core/gateway/apim-api.bicep' = {
     name: customerApiName
     displayName: customerApiDisplayName
     path: customerApiPath
-    openApiSpecUrl: customerOpenApiSpecUrl
+    policy: apimAPIPolicyReplaced
+    definition: loadTextContent(customerApiDefinition)
     apimName: apiManagementNameLza
+    logicAppsName: logicApp.outputs.logicAppsName
+    logicAppsId: logicApp.outputs.logicAppsId
+    logicAppsDefaultHostname: logicApp.outputs.logicAppsDefaultHostname
+    namedValues: customerNamedValues
   }
 }
 
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_SUBSCRIPTION_ID string = subscription().subscriptionId
+output RESOURCE_GROUP_NAME string = rg.name
+output LZA_RESOURCE_GROUP_NAME string = lzaResourceGroup.name
+output LZA_APIM_NAME string = apiManagementNameLza
+output LOGIC_APPS_NAME string = logicApp.outputs.logicAppsName
+output LA_ORCHESTRATION_CUSTOMER_WF_NAME string = laOrchestrationCustomerWorkflow
+output LA_ORCHESTRATION_CUSTOMER_WF_TRIGGER string = laOrchestrationCustomerWorkflowTrigger
+output LA_ORCHESTRATION_CUSTOMER_WF_API_VERSION_NV string = laOrchestrationCustomerWorkflowApiVersionNamedValue
+output LA_ORCHESTRATION_CUSTOMER_WF_SP_NV string = laOrchestrationCustomerWorkflowSpNamedValue
+output LA_ORCHESTRATION_CUSTOMER_WF_SV_NV string = laOrchestrationCustomerWorkflowSvNamedValue
+output LA_ORCHESTRATION_CUSTOMER_WF_SIG_NV string = laOrchestrationCustomerWorkflowSigNamedValue

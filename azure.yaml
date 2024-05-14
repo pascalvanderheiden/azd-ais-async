@@ -5,10 +5,23 @@
 # To learn more about the azure.yaml file, visit https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/azd-schema
 
 # Name of the application.
-name: azd-ais-async   
+name: azd-ais-async
+requiredVersions:
+  azd: ">= 1.4.0"
+services:
+  api:
+    project: ./workflow
+    language: js
+    host: function
+    hooks: 
 hooks:
   preprovision:
     shell: pwsh
     run: ./scripts/set-env.ps1
+    continueOnError: false
+    interactive: true
+  postdeploy:
+    shell: pwsh
+    run: ./scripts/update-apim-named-values.ps1
     continueOnError: false
     interactive: true
