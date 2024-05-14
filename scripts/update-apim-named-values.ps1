@@ -46,11 +46,11 @@ if ($? -eq $true) {
                     (az apim nv update --service-name $azdenv.LZA_APIM_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_SV_NV --value $sv --secret false) -and
                     (az apim nv update --service-name $azdenv.LZA_APIM_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_API_VERSION_NV --value $apiVersion --secret false)
                 ) {
-                    Write-Host "Successfully updated API Management Named Value with key"
+                    Write-Host "Successfully updated API Management Named Values"
                 }
                 else
                 {
-                    Write-Host "Failed to update API Management Named Value with key"
+                    Write-Host "Failed to update API Management Named Values"
                     exit 1
                 }
             } 
