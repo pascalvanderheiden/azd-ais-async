@@ -5,9 +5,11 @@ param privateLinkServiceId string
 param groupIds array
 param dnsZoneName string
 param location string
+param lzaResourceGroup string
 
 resource privateEndpointSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-09-01' existing = {
   name: '${vNetName}/${subnetName}'
+  scope: resourceGroup('${lzaResourceGroup}')
 }
 
 resource privateEndpointDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' existing = {

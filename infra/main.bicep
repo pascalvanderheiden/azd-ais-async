@@ -10,84 +10,37 @@ param environmentName string
 param location string
 
 @description('Resource group name of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param resourceGroupNameLza string
+param resourceGroupNameLza string = ''
 
 @description('Service Bus Namespace name of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param serviceBusNamespaceNameLza string
+param serviceBusNamespaceNameLza string = ''
 
 @description('Storage Account name of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param storageAccountNameLza string
+param storageAccountNameLza string = ''
 
 @description('App Service Plan name of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param appServicePlanNameLza string
+param appServicePlanNameLza string = ''
 
 @description('API Management name of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param apiManagementNameLza string
+param apiManagementNameLza string = ''
 
 @description('Key Vault name of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param keyVaultNameLza string
+param keyVaultNameLza string = ''
 
 @description('Application Insights name of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param appInsightsNameLza string
+param appInsightsNameLza string = ''
 
 @description('Logic Apps Virtual Network Subnet name (for non-ASEv3 Logic Apps) of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param logicAppsSubnetNameLza string
+param logicAppsSubnetNameLza string = ''
 
-@description('Private Endpoint Virtual Network Subnet name (for non-ASEv3 Logic Apps) of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param peSubnetNameLza string
+@description('Private Endpoint Virtual Network Subnet name of the Integration Landingzone deployment.')
+param peSubnetNameLza string = ''
 
 @description('Virtual Network name (for non-ASEv3 Logic Apps) of the Integration Landingzone deployment.')
-@metadata({
-  azd: {
-    type: 'string'
-  }
-})
-param vnetNameLza string
+param vnetNameLza string = ''
+
+@description('Deploy to ASEv3')
+param deployToAse bool = false
 
 //Leave blank to use default naming conventions
 param laIdentityName string = ''
@@ -295,9 +248,8 @@ output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
 output AZURE_SUBSCRIPTION_ID string = subscription().subscriptionId
 output RESOURCE_GROUP_NAME string = rg.name
-output LZA_RESOURCE_GROUP_NAME string = lzaResourceGroup.name
-output LZA_APIM_NAME string = apiManagementNameLza
 output LOGIC_APPS_NAME string = logicApp.outputs.logicAppsName
+output COSMOS_DB_ACCOUNT_NAME string = cosmosDb.outputs.cosmosDbAccountName
 output LA_ORCHESTRATION_CUSTOMER_WF_NAME string = laOrchestrationCustomerWorkflow
 output LA_ORCHESTRATION_CUSTOMER_WF_TRIGGER string = laOrchestrationCustomerWorkflowTrigger
 output LA_ORCHESTRATION_CUSTOMER_WF_API_VERSION_NV string = laOrchestrationCustomerWorkflowApiVersionNamedValue

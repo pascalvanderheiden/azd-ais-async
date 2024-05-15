@@ -13,6 +13,39 @@
       },
       "myPrincipalId": {
         "value": "${MY_USER_ID}"
+      },
+      "resourceGroupNameLza": {
+        "value": "${LZA_RESOURCE_GROUP_NAME}"
+      },
+      "serviceBusNamespaceNameLza": {
+        "value": "${LZA_SERVICE_BUS_NAMESPACE_NAME}"
+      },
+      "storageAccountNameLza": {
+        "value": "${LZA_STORAGE_ACCOUNT_NAME}"
+      },
+      "keyVaultNameLza": {
+        "value": "${LZA_KEY_VAULT_NAME}"
+      },
+      "appServicePlanNameLza": {
+        "value": "${LZA_APP_SERVICE_PLAN_NAME}"
+      },
+      "apiManagementNameLza": {
+        "value": "${LZA_API_MANAGEMENT_NAME}"
+      },
+      "appInsightsNameLza": {
+        "value": "${LZA_APP_INSIGHTS_NAME}"
+      },
+      "logicAppsSubnetNameLza": {
+        "value": "${LZA_LOGIC_APPS_SUBNET_NAME}"
+      },
+      "peSubnetNameLza": {
+        "value": "${LZA_PE_SUBNET_NAME}"
+      },
+      "vnetNameLza": {
+        "value": "${LZA_VNET_NAME}"
+      },
+      "deployToAse": {
+        "value": "${DEPLOY_TO_ASE}"
       }
     }
 }

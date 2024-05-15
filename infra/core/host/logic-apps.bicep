@@ -126,6 +126,7 @@ module privateEndpoint '../networking/private-endpoint.bicep' = {
     privateLinkServiceId: logicApp.id
     vNetName: vnet.name
     location: location
+    lzaResourceGroup: lzaResourceGroup
   }
 }
 

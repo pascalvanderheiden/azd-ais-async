@@ -15,14 +15,6 @@ param peSubnetNameLza string
 
 var defaultConsistencyLevel = 'Session'
 
-resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' existing = {
-  name: vnetNameLza
-  scope: resourceGroup('${lzaResourceGroup}')
-  resource peSubnet 'subnets@2022-01-01' existing = {
-    name: peSubnetNameLza
-  }
-}
-
 resource account 'Microsoft.DocumentDB/databaseAccounts@2022-05-15' = {
   name: toLower(name)
   kind: 'GlobalDocumentDB'
@@ -103,10 +95,11 @@ module privateEndpoint '../networking/private-endpoint.bicep' = {
     ]
     dnsZoneName: cosmosDbPrivateDnsZoneName
     name: cosmosDbPrivateEndpointName
-    subnetName: vnet::peSubnet.name
+    subnetName: peSubnetNameLza
     privateLinkServiceId: account.id
-    vNetName: vnet.name
+    vNetName: vnetNameLza
     location: location
+    lzaResourceGroup: lzaResourceGroup
   }
 }
 
