@@ -31,15 +31,9 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' existing = {
   scope: resourceGroup('${lzaResourceGroup}')
 }
 
-resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' existing = {
-  name: vnetNameLza
+resource laSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-09-01' existing = {
+  name: '${vnetNameLza}/${logicAppsSubnetNameLza}'
   scope: resourceGroup('${lzaResourceGroup}')
-  resource laSubnet 'subnets@2022-01-01' existing = {
-    name: logicAppsSubnetNameLza
-  }
-  resource peSubnet 'subnets@2022-01-01' existing = {
-    name: peSubnetNameLza
-  }
 }
 
 resource managedIdentityLa 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
@@ -63,7 +57,7 @@ resource logicApp 'Microsoft.Web/sites@2022-03-01' = {
       vnetContentShareEnabled: true
       storageAccountRequired: true
       publicNetworkAccess: 'Enabled'
-      virtualNetworkSubnetId: vnet::laSubnet.id
+      virtualNetworkSubnetId: laSubnet.id
       serverFarmId: appServicePlan.id
       clientAffinityEnabled: false
       keyVaultReferenceIdentity: managedIdentityLa.id
@@ -122,9 +116,9 @@ module privateEndpoint '../networking/private-endpoint.bicep' = {
     ]
     dnsZoneName: logicAppsPrivateDnsZoneName
     name: logicAppsPrivateEndpointName
-    subnetName: vnet::peSubnet.name
+    subnetName: peSubnetNameLza
     privateLinkServiceId: logicApp.id
-    vNetName: vnet.name
+    vNetName: vnetNameLza
     location: location
     lzaResourceGroup: lzaResourceGroup
   }

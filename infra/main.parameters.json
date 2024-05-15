@@ -36,7 +36,7 @@
         "value": "${LZA_APP_INSIGHTS_NAME}"
       },
       "logicAppsSubnetNameLza": {
-        "value": "${LZA_LOGIC_APPS_SUBNET_NAME}"
+        "value": "${LZA_LA_SUBNET_NAME}"
       },
       "peSubnetNameLza": {
         "value": "${LZA_PE_SUBNET_NAME}"
@@ -45,7 +45,7 @@
         "value": "${LZA_VNET_NAME}"
       },
       "deployToAse": {
-        "value": "${DEPLOY_TO_ASE}"
+        "value": "${LZA_ASEV3_DEPLOYMENT}"
       }
     }
 }
