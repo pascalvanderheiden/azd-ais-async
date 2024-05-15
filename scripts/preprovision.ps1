@@ -45,6 +45,9 @@ if ($? -eq $true) {
     $resourceGroupQuestion = "In which Resource Group did you deployed the Azure Integration Service Landing Zone?"
     $selectedresourceGroup = Get-InteractiveMenuChooseUserSelection -Question $resourceGroupQuestion -Answers $resourceGroupMenuItem -Options $options
     azd env set LZA_RESOURCE_GROUP_NAME $selectedresourceGroup
+    # Overwrite the default location with the location of the Landing Zone resource group
+    $selectedLocation = $azureResourceGroups | Where-Object { $_.name -eq $selectedresourceGroup } | Select-Object -ExpandProperty location
+    azd env set AZURE_LOCATION $selectedLocation
 
     ###################
     ## Select Service Bus Namespace
