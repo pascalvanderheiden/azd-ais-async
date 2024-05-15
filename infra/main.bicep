@@ -73,6 +73,14 @@ param appInsightsNameLza string
 })
 param logicAppsSubnetNameLza string
 
+@description('Private Endpoint Virtual Network Subnet name (for non-ASEv3 Logic Apps) of the Integration Landingzone deployment.')
+@metadata({
+  azd: {
+    type: 'string'
+  }
+})
+param peSubnetNameLza string
+
 @description('Virtual Network name (for non-ASEv3 Logic Apps) of the Integration Landingzone deployment.')
 @metadata({
   azd: {
@@ -144,6 +152,12 @@ var customerNamedValues = [
     secret: true
   }
 ]
+var logicAppsPrivateDnsZoneName = 'privatelink.azurewebsites.net'
+var cosmosDbPrivateDnsZoneName = 'privatelink.documents.azure.com'
+var privateDnsZoneNames = [
+  logicAppsPrivateDnsZoneName
+  cosmosDbPrivateDnsZoneName
+]
 
 // Organize resources in a resource group for your integration pattern
 resource rg 'Microsoft.Resources/resourceGroups@2022-09-01' = {
@@ -160,6 +174,15 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: keyVaultNameLza
   scope: resourceGroup(resourceGroupNameLza)
 }
+
+module dnsDeployment './core/networking/dns.bicep' = [for privateDnsZoneName in privateDnsZoneNames: {
+  name: 'dns-deployment-${privateDnsZoneName}'
+  scope: rg
+  params: {
+    name: privateDnsZoneName
+    tags: tags
+  }
+}]
 
 module managedIdentityLa './core/security/managed-identity.bicep' = {
   name: 'managed-identity-la'
@@ -204,6 +227,10 @@ module cosmosDb './core/database/cosmos.bicep' = {
     cosmosDbPartitionKeyPath: cosmosDbPartitionKeyPath
     keyVaultName: keyVaultNameLza
     cosmosDbConnectionStringSecretName: cosmosDbConnectionStringSecretName
+    vnetNameLza: vnetNameLza
+    cosmosDbPrivateEndpointName: '${abbrs.documentDBDatabaseAccounts}${abbrs.privateEndpoints}${resourceToken}'
+    cosmosDbPrivateDnsZoneName: logicAppsPrivateDnsZoneName
+    peSubnetNameLza: peSubnetNameLza
   }
 }
 
@@ -235,6 +262,9 @@ module logicApp './core/host/logic-apps.bicep' = {
     cosmosDbName: cosmosDb.outputs.cosmosDbAccountName
     cosmosDbConnectionString: keyVault.getSecret(cosmosDbConnectionStringSecretName)
     myIpAddress: myIpAddress
+    logicAppsPrivateEndpointName: '${abbrs.logicWorkflows}${abbrs.privateEndpoints}${resourceToken}'
+    logicAppsPrivateDnsZoneName: logicAppsPrivateDnsZoneName
+    peSubnetNameLza: peSubnetNameLza
   }
   dependsOn: [
     managedIdentityLa

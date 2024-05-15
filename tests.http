@@ -17,7 +17,7 @@ GET https://{{frontDoorGwEndpoint}}/calc/add?a=51&b=49
 api-key: {{subscriptionKeyConsumer}}
 
 ### Customer API - Create
-POST https://{{frontDoorGwEndpoint}}/{{apiPath}}/create
+POST https://{{frontDoorGwEndpoint}}/{{apiPath}}
 Content-Type: application/json
 api-key: {{subscriptionKeyConsumer}}
 
@@ -29,7 +29,7 @@ Content-Type: application/json
 api-key: {{subscriptionKeyConsumer}}
 
 ### Customer API - Update
-PATCH https://{{frontDoorGwEndpoint}}/{{apiPath}}/{{id}}
+PUT https://{{frontDoorGwEndpoint}}/{{apiPath}}/{{id}}
 Content-Type: application/json
 api-key: {{subscriptionKeyConsumer}}
 

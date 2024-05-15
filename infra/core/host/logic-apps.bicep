@@ -17,6 +17,9 @@ param vnetNameLza string
 param logicAppsSubnetNameLza string
 param allowedOrigins array = []
 param myIpAddress string = ''
+param logicAppsPrivateEndpointName string
+param logicAppsPrivateDnsZoneName string
+param peSubnetNameLza string
 
 resource appInsight 'Microsoft.Insights/components@2020-02-02' existing = {
   name: appInsightName
@@ -31,8 +34,11 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' existing = {
 resource vnet 'Microsoft.Network/virtualNetworks@2023-04-01' existing = {
   name: vnetNameLza
   scope: resourceGroup('${lzaResourceGroup}')
-  resource subnet 'subnets@2022-01-01' existing = {
+  resource laSubnet 'subnets@2022-01-01' existing = {
     name: logicAppsSubnetNameLza
+  }
+  resource peSubnet 'subnets@2022-01-01' existing = {
+    name: peSubnetNameLza
   }
 }
 
@@ -57,7 +63,7 @@ resource logicApp 'Microsoft.Web/sites@2022-03-01' = {
       vnetContentShareEnabled: true
       storageAccountRequired: true
       publicNetworkAccess: 'Enabled'
-      virtualNetworkSubnetId: vnet::subnet.id
+      virtualNetworkSubnetId: vnet::laSubnet.id
       serverFarmId: appServicePlan.id
       clientAffinityEnabled: false
       keyVaultReferenceIdentity: managedIdentityLa.id
@@ -105,6 +111,21 @@ resource logicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
           { name: 'cosmosDb_name', value: cosmosDbName }
           { name: 'cosmosDb_connectionString', value: cosmosDbConnectionString }
       ]
+  }
+}
+
+module privateEndpoint '../networking/private-endpoint.bicep' = {
+  name: '${logicApp.name}-privateEndpoint-deployment'
+  params: {
+    groupIds: [
+      'sites'
+    ]
+    dnsZoneName: logicAppsPrivateDnsZoneName
+    name: logicAppsPrivateEndpointName
+    subnetName: vnet::peSubnet.name
+    privateLinkServiceId: logicApp.id
+    vNetName: vnet.name
+    location: location
   }
 }
 

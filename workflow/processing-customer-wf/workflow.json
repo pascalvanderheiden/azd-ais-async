@@ -97,7 +97,7 @@
                         },
                         "case": "POST"
                     },
-                    "Case_-_Patch": {
+                    "Case_-_Put": {
                         "actions": {
                             "Update_item": {
                                 "type": "ServiceProvider",
@@ -134,7 +134,7 @@
                                 }
                             }
                         },
-                        "case": "PATH"
+                        "case": "PUT"
                     },
                     "Case_-_Delete": {
                         "actions": {
