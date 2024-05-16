@@ -6,7 +6,7 @@
                 "type": "Compose",
                 "inputs": {
                     "method": "@{triggerOutputs()?['headers']?['method']}",
-                    "message": "@{triggerBody()}"
+                    "message": "@triggerBody()"
                 },
                 "runAfter": {}
             },
