@@ -431,5 +431,5 @@ yarn-error.log*
 next-env.d.ts
 
 # workflows
-src/workflow-designtime
-src/local.settings.json
+workflow/workflow-designtime
+workflow/local.settings.json

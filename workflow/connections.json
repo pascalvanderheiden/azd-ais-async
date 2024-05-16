@@ -12,12 +12,12 @@
     },
     "AzureCosmosDB": {
       "parameterValues": {
-        "connectionString": "@appsetting('cosmosDB_connectionString')"
+        "connectionString": "@appsetting('cosmosDb_connectionString')"
       },
       "serviceProvider": {
         "id": "/serviceProviders/AzureCosmosDB"
       },
-      "displayName": "@appsetting('cosmosDB_name')"
+      "displayName": "@appsetting('cosmosDb_name')"
     }
   },
   "managedApiConnections": {}

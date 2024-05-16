@@ -9,7 +9,7 @@
                     "Parse_JSON": {
                         "type": "ParseJson",
                         "inputs": {
-                            "content": "@item()?['contentData']",
+                            "content": "@replace(item()?['contentData'],'\\','')",
                             "schema": {
                                 "type": "object",
                                 "properties": {
