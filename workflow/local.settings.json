@@ -3,10 +3,8 @@
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "APP_KIND": "workflowapp",
-    "ProjectDirectoryPath": "/Users/pascalvanderheiden/Documents/GitHub/azd-ais-async/src",
+    "ProjectDirectoryPath": "/Users/pascalvanderheiden/Documents/GitHub/azd-ais-async/workflow",
     "FUNCTIONS_WORKER_RUNTIME": "node",
-    "WORKFLOWS_SUBSCRIPTION_ID": "",
-    "serviceBus_connectionString": "Endpoint=sb://sb-piml5auuyzesa.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=VpBpnwEMXrtcxZ1DK2b66YMIx+LPv+vxf+ASbBSyZxQ=",
-    "AzureCosmosDB_connectionString": "AccountEndpoint=https://cosmos-u4zjy4v466aum.documents.azure.com:443/;AccountKey=n3pVfc8WoGZNiCVWRzsYAyigb5d4yfA2iyVZ5iOQ6GIVMYXmgGvE5vwkbhHwZdP8PgAKS02iLmkEACDbn9t9Mg==;"
+    "WORKFLOWS_SUBSCRIPTION_ID": ""
   }
 }

@@ -41,10 +41,10 @@ if ($? -eq $true) {
                 $sv = ($json.queries | Where-Object sv).sv
                 $sig = ($json.queries | Where-Object sig).sig
                 if (
-                    (az apim nv update --service-name $azdenv.LZA_APIM_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_SIG_NV --value $sig --secret true) -and
-                    (az apim nv update --service-name $azdenv.LZA_APIM_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_SP_NV --value $sp --secret false) -and
-                    (az apim nv update --service-name $azdenv.LZA_APIM_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_SV_NV --value $sv --secret false) -and
-                    (az apim nv update --service-name $azdenv.LZA_APIM_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_API_VERSION_NV --value $apiVersion --secret false)
+                    (az apim nv update --service-name $azdenv.LZA_API_MANAGEMENT_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_SIG_NV --value $sig --secret true) -and
+                    (az apim nv update --service-name $azdenv.LZA_API_MANAGEMENT_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_SP_NV --value $sp --secret false) -and
+                    (az apim nv update --service-name $azdenv.LZA_API_MANAGEMENT_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_SV_NV --value $sv --secret false) -and
+                    (az apim nv update --service-name $azdenv.LZA_API_MANAGEMENT_NAME -g $azdenv.LZA_RESOURCE_GROUP_NAME --named-value-id $azdenv.LA_ORCHESTRATION_CUSTOMER_WF_API_VERSION_NV --value $apiVersion --secret false)
                 ) {
                     Write-Host "Successfully updated API Management Named Values"
                 }

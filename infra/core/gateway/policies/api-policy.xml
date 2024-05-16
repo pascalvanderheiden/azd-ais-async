@@ -16,6 +16,9 @@
         <set-query-parameter name="sig" exists-action="append">
             <value>{{__sig__}}</value>
         </set-query-parameter>
+        <set-header name="method" exists-action="append">
+            <value>@(context.Operation.Method)</value>
+        </set-header>
     </inbound>
     <backend>
         <forward-request />

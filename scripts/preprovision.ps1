@@ -8,6 +8,16 @@ if ($? -eq $true) {
     $myPrincipal = az ad signed-in-user show --query "id" -o tsv
     azd env set MY_USER_ID $myPrincipal
 
+    # Install needed extensions
+    #Write-Host "Updating az extensions to the latest..."
+    #$azExtension = az extension list --query "[?name=='appservice-kube'].name" -o tsv  
+    #if (!$azExtension) {
+    #    az extension add --name appservice-kube
+    #}
+    #else {
+    #    az extension update --name appservice-kube
+    #}
+
     # Install InteractiveMenu module
     $module = Get-Module -Name "InteractiveMenu" -ListAvailable
     if ($module) {
@@ -49,6 +59,8 @@ if ($? -eq $true) {
     $selectedLocation = $azureResourceGroups | Where-Object { $_.name -eq $selectedresourceGroup } | Select-Object -ExpandProperty location
     azd env set AZURE_LOCATION $selectedLocation
 
+    Write-Host "One sec...fetching resources in the resource group $selectedresourceGroup... and selecting if there is only 1."
+
     ###################
     ## Select Service Bus Namespace
     ###################
@@ -57,6 +69,7 @@ if ($? -eq $true) {
     $serviceBusNamespaces = (az servicebus namespace list --resource-group $selectedresourceGroup --output json --only-show-errors) | ConvertFrom-Json
     
     if ($serviceBusNamespaces.Count -eq 1) {
+        Write-Host "Service Bus Namespace found. Selecting $($serviceBusNamespaces[0].name)."
         $selectedServiceBusNamespace = $serviceBusNamespaces[0].name
     } else {
         foreach ($serviceBusNamespace in $serviceBusNamespaces){
@@ -76,10 +89,11 @@ if ($? -eq $true) {
     ## Select Storage Account
     ###################
     
-    $storageAccountMenuItem = @()
+    $storageAccountMenuItem = @() | Out-Null
     $storageAccounts = (az storage account list --resource-group $selectedresourceGroup --output json --only-show-errors) | ConvertFrom-Json
     
     if ($storageAccounts.Count -eq 1) {
+        Write-Host "Storage Account found. Selecting $($storageAccounts[0].name)."
         $selectedStorageAccount = $storageAccounts[0].name
     } else {
         foreach ($storageAccount in $storageAccounts){
@@ -103,6 +117,7 @@ if ($? -eq $true) {
     $keyVaults = (az keyvault list --resource-group $selectedresourceGroup --output json --only-show-errors) | ConvertFrom-Json
     
     if ($keyVaults.Count -eq 1) {
+        Write-Host "Key Vault found. Selecting $($keyVaults[0].name)."
         $selectedKeyVault = $keyVaults[0].name
     } else {
         foreach ($keyVault in $keyVaults){
@@ -123,9 +138,10 @@ if ($? -eq $true) {
     ###################
     
     $appServicePlanMenuItem = @()
-    $appServicePlans = (az appservice plan list --resource-group $selectedresourceGroup --output json --only-show-errors) | ConvertFrom-Json
+    $appServicePlans = (az appservice plan list --resource-group $selectedresourceGroup --output json --only-show-errors 2>$null) | ConvertFrom-Json
     
     if ($appServicePlans.Count -eq 1) {
+        Write-Host "App Service Plan found. Selecting $($appServicePlans[0].name)."
         $selectedAppServicePlan = $appServicePlans[0].name
     } else {
         foreach ($appServicePlan in $appServicePlans){
@@ -157,6 +173,7 @@ if ($? -eq $true) {
     $apiManagements = (az apim list --resource-group $selectedresourceGroup --output json --only-show-errors) | ConvertFrom-Json
     
     if ($apiManagements.Count -eq 1) {
+        Write-Host "API Management Instance found. Selecting $($apiManagements[0].name)."
         $selectedApiManagement = $apiManagements[0].name
     } else {
         foreach ($apiManagement in $apiManagements){
@@ -180,6 +197,7 @@ if ($? -eq $true) {
     $appInsights = (az monitor app-insights component show --resource-group $selectedresourceGroup --output json --only-show-errors) | ConvertFrom-Json
     
     if ($appInsights.Count -eq 1) {
+        Write-Host "Application Insights Instance found. Selecting $($appInsights[0].name)."
         $selectedAppInsights = $appInsights[0].name
     } else {
         foreach ($appInsight in $appInsights){
@@ -203,6 +221,7 @@ if ($? -eq $true) {
     $vnets = (az network vnet list --resource-group $selectedresourceGroup --output json --only-show-errors) | ConvertFrom-Json
 
     if ($vnets.Count -eq 1) {
+        Write-Host "VNet found. Selecting $($vnets[0].name)."
         $selectedVNet = $vnets[0].name
     } else {
         foreach ($vnet in $vnets){

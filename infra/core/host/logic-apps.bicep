@@ -99,6 +99,7 @@ resource logicAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
           { name: 'WEBSITE_NODE_DEFAULT_VERSION', value: '~16' }
           { name: 'WEBSITE_VNET_ROUTE_ALL', value: '1'}
           { name: 'WEBSITE_DNS_SERVER', value: '168.63.129.16'}
+          { name: 'WEBSITE_CONTENTOVERVNET', value: '1'}
           { name: 'Workflows.my-workflow.FlowState', value: 'Enabled' }
           { name: 'serviceBus_name', value: serviceBusNamespaceName }
           { name: 'serviceBus_connectionString', value: serviceBusConnectionString }
