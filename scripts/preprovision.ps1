@@ -8,27 +8,22 @@ if ($? -eq $true) {
     $myPrincipal = az ad signed-in-user show --query "id" -o tsv
     azd env set MY_USER_ID $myPrincipal
 
-    # Install needed extensions
-    #Write-Host "Updating az extensions to the latest..."
-    #$azExtension = az extension list --query "[?name=='appservice-kube'].name" -o tsv  
-    #if (!$azExtension) {
-    #    az extension add --name appservice-kube
-    #}
-    #else {
-    #    az extension update --name appservice-kube
-    #}
+    # Define the path to the InteractiveMenu module
+    $currentDir = Get-Location 
+    $modulePath = "\scripts\InteractiveMenu\InteractiveMenu.psd1"
 
-    # Install InteractiveMenu module
-    $module = Get-Module -Name "InteractiveMenu" -ListAvailable
-    if ($module) {
-        Update-Module -Name "InteractiveMenu" -Force
-    }
-    else {
-        Set-PSRepository PSGallery -InstallationPolicy Trusted
-        Install-Module -Name InteractiveMenu -Confirm:$False -Force
-    }
+    # Check if the module exists
+    if (Test-Path $modulePath) {
+        # Remove the old module if it's already loaded
+        if (Get-Module -Name InteractiveMenu) {
+            Remove-Module -Name InteractiveMenu
+        }
 
-    Import-Module InteractiveMenu
+        # Import the InteractiveMenu module from the local directory
+        Import-Module $modulePath
+    } else {
+        Write-Host "The module $modulePath does not exist."
+    }
 
     $options = @{
         MenuInfoColor = [ConsoleColor]::DarkYellow
