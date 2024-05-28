@@ -1,8 +1,8 @@
-param storageAccountName string
+param name string
 param fileShareName string
 
 resource storage 'Microsoft.Storage/storageAccounts@2023-01-01' existing = {
-  name: storageAccountName
+  name: name
 }
 
 resource fileShareService 'Microsoft.Storage/storageAccounts/fileServices@2023-04-01' existing = {

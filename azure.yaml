@@ -20,6 +20,11 @@ hooks:
     run: ./scripts/preprovision.ps1
     continueOnError: false
     interactive: true
+  predeploy:
+    shell: pwsh
+    run: ./scripts/predeploy.ps1
+    continueOnError: false
+    interactive: true
   postdeploy:
     shell: pwsh
     run: ./scripts/postdeploy.ps1

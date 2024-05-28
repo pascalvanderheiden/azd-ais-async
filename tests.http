@@ -1,7 +1,6 @@
 @apimName = <your-api-management-name>
-@apiPath = <your-api-path>
-@id = <your-id>
-@body = <your-api-body>
+@apiPath = customer
+@id = 1234567890
 @frontDoorGwEndpoint = <your-frontdoor-gateway-endpoint>
 @subscriptionKeyConsumer = <your-consumer-subscription-key>
 
@@ -21,7 +20,18 @@ POST https://{{frontDoorGwEndpoint}}/{{apiPath}}
 Content-Type: application/json
 api-key: {{subscriptionKeyConsumer}}
 
-{{body}}
+{
+    "customerId": "1234567890",
+    "customerName": "John Doe",
+    "customerEmail": "",
+    "customerPhone": "1234567890",
+    "customerAddress": {
+        "street": "123 Main St",
+        "city": "Anytown",
+        "state": "CA",
+        "zip": "12345"
+    }
+}
 
 ### Customer API - Delete
 DELETE https://{{frontDoorGwEndpoint}}/{{apiPath}}/{{id}}
@@ -33,4 +43,15 @@ PUT https://{{frontDoorGwEndpoint}}/{{apiPath}}/{{id}}
 Content-Type: application/json
 api-key: {{subscriptionKeyConsumer}}
 
-{{body}}
+{
+    "customerId": "1234567890",
+    "customerName": "John Doe",
+    "customerEmail": "",
+    "customerPhone": "1234567890",
+    "customerAddress": {
+        "street": "123 Main St",
+        "city": "Anytown",
+        "state": "CA",
+        "zip": "12345"
+    }
+}
