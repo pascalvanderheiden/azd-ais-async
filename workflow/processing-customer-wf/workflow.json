@@ -19,7 +19,7 @@
                                     "message": {
                                         "type": "object",
                                         "properties": {
-                                            "customerId": {
+                                            "id": {
                                                 "type": "string"
                                             },
                                             "customerName": {
@@ -70,7 +70,7 @@
                                                 "databaseId": "ods",
                                                 "containerId": "customer",
                                                 "item": "@body('Parse_JSON')?['message']",
-                                                "isUpsert": false
+                                                "isUpsert": true
                                             },
                                             "serviceProviderConfiguration": {
                                                 "connectionName": "AzureCosmosDB",
@@ -111,8 +111,8 @@
                                             "parameters": {
                                                 "databaseId": "ods",
                                                 "containerId": "customer",
-                                                "itemId": "@body('Parse_JSON')?['message']?['customerId']",
-                                                "partitionKey": "customerId"
+                                                "itemId": "@body('Parse_JSON')?['message']?['id']",
+                                                "partitionKey": "/customerAddress/city"
                                             },
                                             "serviceProviderConfiguration": {
                                                 "connectionName": "AzureCosmosDB",

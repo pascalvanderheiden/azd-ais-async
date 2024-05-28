@@ -67,7 +67,7 @@
                     "schema": {
                         "type": "object",
                         "properties": {
-                            "customerId": {
+                            "id": {
                                 "type": "string"
                             },
                             "customerName": {
