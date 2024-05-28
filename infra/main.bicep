@@ -15,8 +15,8 @@ param resourceGroupNameLza string = ''
 @description('Service Bus Namespace name of the Integration Landingzone deployment.')
 param serviceBusNamespaceNameLza string = ''
 
-//@description('Storage Account name of the Integration Landingzone deployment.')
-//param storageAccountNameLza string = ''
+@description('Storage Account name of the Integration Landingzone deployment.')
+param storageAccountNameLza string = ''
 
 @description('App Service Plan name of the Integration Landingzone deployment.')
 param appServicePlanNameLza string = ''
@@ -45,7 +45,6 @@ param deployToAse bool = false
 //Leave blank to use default naming conventions
 param laIdentityName string = ''
 param cosmosDbAccountName string = ''
-param storageAccountName string = ''
 param logicAppsName string = ''
 param myIpAddress string = ''
 //param myPrincipalId string = ''
@@ -69,7 +68,6 @@ var cosmosDbContainerName = 'customer'
 var cosmosDbPartitionKeyPath = '/customerId'
 var cosmosDbConnectionStringSecretName = 'cosmosdb-connection-string'
 var storageConnectionStringSecretName = 'storage-connection-string'
-var deploymentStorageConnectionStringSecretName = 'deployment-storage-connection-string'
 var serviceBusConnectionStringSecretName = 'servicebus-connection-string'
 var serviceBusQueueName = 'customer'
 var customerApiName = 'customer-api'
@@ -191,22 +189,14 @@ module cosmosDb './core/database/cosmos.bicep' = {
   }
 }
 
-module storage './core/storage/storage.bicep' = {
-  name: 'deployment-storage'
-  scope: rg
+module storageFileShare './core/storage/storage-fileshare.bicep' = {
+  name: 'storage-file-share'
+  scope: lzaResourceGroup
   params: {
-    name: !empty(storageAccountName) ? storageAccountName : '${abbrs.storageStorageAccounts}${resourceToken}'
-    location: location
-    lzaResourceGroup: lzaResourceGroup.name
-    tags: tags
-    storageSku: 'Standard_LRS'
-    keyVaultName: keyVaultNameLza
-    deploymentStorageConnectionStringSecretName: deploymentStorageConnectionStringSecretName
-    laName: laName
+    name: storageAccountNameLza
+    fileShareName: laName
   }
 }
-
-
 
 module logicApp './core/host/logic-apps.bicep' = {
   name: 'logicapp'
@@ -221,7 +211,7 @@ module logicApp './core/host/logic-apps.bicep' = {
     aspName: appServicePlanNameLza
     vnetNameLza: vnetNameLza
     logicAppsSubnetNameLza: logicAppsSubnetNameLza
-    storageConnectionString: keyVault.getSecret(deploymentStorageConnectionStringSecretName)
+    storageConnectionString: keyVault.getSecret(storageConnectionStringSecretName)
     serviceBusNamespaceName: serviceBusNamespaceNameLza
     serviceBusConnectionString: keyVault.getSecret(serviceBusConnectionStringSecretName)
     cosmosDbName: cosmosDb.outputs.cosmosDbAccountName
@@ -235,7 +225,7 @@ module logicApp './core/host/logic-apps.bicep' = {
     managedIdentityLa
     laRoleAssignment
     cosmosDb
-    storage
+    storageFileShare
   ]
 }
 
