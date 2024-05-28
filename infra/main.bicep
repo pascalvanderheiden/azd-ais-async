@@ -136,6 +136,8 @@ module dnsDeployment './core/networking/dns.bicep' = [for privateDnsZoneName in 
   params: {
     name: privateDnsZoneName
     tags: tags
+    lzaResourceGroup: lzaResourceGroup.name
+    lzaVnetName: vnetNameLza
   }
 }]
 
@@ -184,7 +186,7 @@ module cosmosDb './core/database/cosmos.bicep' = {
     cosmosDbConnectionStringSecretName: cosmosDbConnectionStringSecretName
     vnetNameLza: vnetNameLza
     cosmosDbPrivateEndpointName: '${abbrs.documentDBDatabaseAccounts}${abbrs.privateEndpoints}${resourceToken}'
-    cosmosDbPrivateDnsZoneName: logicAppsPrivateDnsZoneName
+    cosmosDbPrivateDnsZoneName: cosmosDbPrivateDnsZoneName
     peSubnetNameLza: peSubnetNameLza
   }
 }
