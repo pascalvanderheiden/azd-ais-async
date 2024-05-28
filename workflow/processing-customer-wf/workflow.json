@@ -16,8 +16,14 @@
                                     "method": {
                                         "type": "string"
                                     },
+                                    "queryId": {
+                                        "type": "string"
+                                    },
                                     "message": {
-                                        "type": "object",
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
                                         "properties": {
                                             "id": {
                                                 "type": "string"
@@ -111,7 +117,7 @@
                                             "parameters": {
                                                 "databaseId": "ods",
                                                 "containerId": "customer",
-                                                "itemId": "@body('Parse_JSON')?['message']?['id']",
+                                                "itemId": "@body('Parse_JSON')?['queryId']",
                                                 "partitionKey": "/customerAddress/city"
                                             },
                                             "serviceProviderConfiguration": {

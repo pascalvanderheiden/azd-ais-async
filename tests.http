@@ -21,7 +21,7 @@ Content-Type: application/json
 api-key: {{subscriptionKeyConsumer}}
 
 {
-    "customerId": "1234567890",
+    "id": "1234567890",
     "customerName": "John Doe",
     "customerEmail": "",
     "customerPhone": "1234567890",
@@ -44,7 +44,7 @@ Content-Type: application/json
 api-key: {{subscriptionKeyConsumer}}
 
 {
-    "customerId": "1234567890",
+    "id": "1234567890",
     "customerName": "John Doe",
     "customerEmail": "",
     "customerPhone": "1234567890",

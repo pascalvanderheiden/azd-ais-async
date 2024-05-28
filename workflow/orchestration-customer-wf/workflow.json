@@ -2,14 +2,6 @@
     "definition": {
         "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
         "actions": {
-            "Compose_Service_Bus_Message": {
-                "type": "Compose",
-                "inputs": {
-                    "method": "@{triggerOutputs()?['headers']?['method']}",
-                    "message": "@triggerBody()"
-                },
-                "runAfter": {}
-            },
             "Send_message": {
                 "type": "ServiceProvider",
                 "inputs": {
@@ -55,6 +47,15 @@
                         "FAILED"
                     ]
                 }
+            },
+            "Compose_Service_Bus_Message": {
+                "type": "Compose",
+                "inputs": {
+                    "method": "@{triggerOutputs()?['headers']?['method']}",
+                    "queryId": "@{triggerOutputs()?['queries']['id']}",
+                    "message": "@triggerBody()"
+                },
+                "runAfter": {}
             }
         },
         "contentVersion": "1.0.0.0",
