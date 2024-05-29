@@ -10,14 +10,15 @@ products:
 - azure-logic-apps
 - azure-service-bus
 - azure-api-management
+- azure-cosmos-db
 urlFragment: azd-ais-async
 name: Deploy an Asynchronous Pattern to the azd-ais-lza with Azure Developer CLI
 description: Deploy an Asynchronous Pattern to the azd-ais-lza with Azure Developer CLI to demonstrate an automated deployment of an Integration Pattern to an Azure Integration Services Landingzone. The integration landingzone includes best practices for security, network isolation, monitoring, and more.
 ---
 <!-- YAML front-matter schema: https://review.learn.microsoft.com/en-us/help/contribute/samples/process/onboarding?branch=main#supported-metadata-fields-for-readmemd -->
 
-[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=lightgrey&logo=github)](https://codespaces.new/Azure/azd-ais-async)
-[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev+Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Azure/azd-ais-async)
+[![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=lightgrey&logo=github)](https://codespaces.new/pascalvanderheiden/azd-ais-async)
+[![Open in Dev Container](https://img.shields.io/static/v1?style=for-the-badge&label=Dev+Container&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/pascalvanderheiden/azd-ais-async)
 
 <!--
 Available as template on:
@@ -28,7 +29,7 @@ Available as template on:
 
 Deploy an Asynchronous Pattern to the [azd-ais-lza with](https://github.com/pascalvanderheiden/azd-ais-lza) Azure Developer CLI to demonstrate an automated deployment of an Integration Pattern to an Azure Integration Services Landingzone. The integration landingzone includes best practices for security, network isolation, monitoring, and more.
 
-Based on the choices made during the Landingzone deployment (like deploying Azure Frontdoor, Application Service Environment v3, Azure Service Bus), the Asynchronous Pattern will be deployed to the Landingzone. The Asynchronous Pattern includes an Azure Logic App with multiple workflows, Azure Service Bus Queues, CosmosDB as an ODS, and APIs in Azure API Management.
+Based on the choices made during the Landingzone deployment (like deploying Azure Frontdoor, Application Service Environment v3, Azure Service Bus), the Asynchronous Pattern will be deployed in its own resource group, but will be leveraging resources in the Landingzone via the vnet (and Private Endpoints). The Asynchronous Pattern includes an Azure Logic App with multiple workflows, Azure Service Bus Queues, CosmosDB as an ODS, and APIs in Azure API Management.
 
 ## Key features
 
@@ -83,27 +84,9 @@ azd auth login
 azd up
 ```
 
-It will prompt you to login, pick a subscription, and provide a location (like "eastus"). We've added extra conditional parameters to determine to which infrastructure services you want to deploy. For example, Azure Service Bus is an optional service that you can choose to deploy or not in the Landingzone. For this pattern, the Service Bus service is required. This pattern will not deploy an instance of Service Bus, but you'll need to have it deployed in the Landingzone. The same applies to the App Service Environment v3, if you have chosen to deploy Logic Apps to an isolated environment, this App Service Plan will be used. Otherwise, the Logic Apps will be deployed to the "public, but shielded off from the internet" App Service Plan.
-
-```shell 
+It will prompt you to login, pick a subscription, and provide a location (like "eastus"). We've added extra conditional parameters to determine to which landingzone services you want to deploy. For example, Azure Service Bus is an optional service that you can choose to deploy or not in the Landingzone. For this pattern, the Service Bus service is required. This pattern will not deploy an instance of Service Bus, but you'll need to have it deployed in the Landingzone. The same applies to the App Service Environment v3, if you have chosen to deploy Logic Apps to an isolated environment, this App Service Plan will be used. Otherwise, the Logic Apps will be deployed to the "standard, but shielded off from the internet" App Service Plan. At first you are asked to provide the resource group name of the integration Landingzone, and it will look for the Service Bus namespace, App Service Plan, Vnet and API management in that resource group. If there is only one available it will use that one, otherwise it will prompt you to choose one.
 
 For more details on the deployed services, see [additional details](#additional-details) below.
-
-The conditional parameters set in the `azd up` command are stored in the .azure\<name>\config.json file:
-
-```json
-{
-  "infra": {
-    "parameters": {
-      "serviceBusNamespaceLza": "<service bus namespace name of the integration landingzone>>",
-      "appServicePlanLza": "<app service plan name of the integration landingzone>>",
-      "resourceGroupNameLza": "<resource group name of the integration landingzone>"
-      "apiManagementNameLza": "<api management name of the integration landingzone>"
-      "frontDoorNameLza": "<front door name of the integration landingzone>"
-    }
-  }
-}
-```
 
 ## Additional features
 
@@ -161,7 +144,7 @@ After forking this repo, you can use this GitHub Action to enable CI/CD for your
 
 | GitHub Action | Status |
 | ----------- | ----------- |
-| `azd` Deploy | [![Deploy](https://github.com/Azure/azd-ais-async/actions/workflows/azure-dev.yml/badge.svg?branch=main)](https://github.com/Azure/azd-ais-async/actions/workflows/azure-dev.yml) |
+| `azd` Deploy | [![Deploy](https://github.com/pascalvanderheiden/azd-ais-async/actions/workflows/azure-dev.yml/badge.svg?branch=main)](https://github.com/pascalvanderheiden/azd-ais-async/actions/workflows/azure-dev.yml) |
 
 ## Additional Details
 
@@ -169,7 +152,7 @@ The following section examines different concepts that help tie in application a
 
 ### Architecture in detail
 
-This repository illustrates how to setup the Azure Integration Services Landing Zone accelerator with Azure Developer CLI. The accelerator includes best practices for security, network isolation, monitoring, and more.
+This repository illustrates how to deploy an Asynchronous Pattern to a predefined Azure Integration Services Landing Zone accelerator, with Azure Developer CLI. The accelerator includes best practices for security, network isolation, monitoring, and more.
 
 We've used the Azure Developer CLI Bicep Starter template to create this repository. With `azd` you can create a new repository with a fully functional CI/CD pipeline in minutes. You can find more information about `azd` [here](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/).
 
