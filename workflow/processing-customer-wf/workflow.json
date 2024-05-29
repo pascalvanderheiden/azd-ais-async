@@ -118,7 +118,7 @@
                                                 "databaseId": "ods",
                                                 "containerId": "customer",
                                                 "itemId": "@body('Parse_JSON')?['queryId']",
-                                                "partitionKey": "/customerAddress/city"
+                                                "partitionKey": "@body('Parse_JSON')?['queryId']"
                                             },
                                             "serviceProviderConfiguration": {
                                                 "connectionName": "AzureCosmosDB",

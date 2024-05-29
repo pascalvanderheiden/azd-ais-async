@@ -19,12 +19,34 @@
         <set-header name="method" exists-action="append">
             <value>@(context.Operation.Method)</value>
         </set-header>
+        <choose>
+            <when condition="@(context.Operation.Method.Equals("DELETE"))">
+                <set-query-parameter name="id" exists-action="append">
+                    <value>@(context.Request.MatchedParameters["id"])</value>
+                </set-query-parameter>
+            </when>
+            <otherwise>
+                <set-query-parameter name="id" exists-action="append">
+                    <value />
+                </set-query-parameter>
+            </otherwise>
+        </choose>
     </inbound>
     <backend>
         <forward-request />
     </backend>
     <outbound>
         <base/>
+        <set-header name="method" exists-action="append">
+            <value>@(context.Operation.Method)</value>
+        </set-header>
+        <choose>
+            <when condition="@(context.Operation.Method.Equals("DELETE"))">
+                <set-header name="id" exists-action="append">
+                    <value>@(context.Request.MatchedParameters["id"])</value>
+                </set-header>
+            </when>
+        </choose>
     </outbound>
     <on-error>
         <base/>

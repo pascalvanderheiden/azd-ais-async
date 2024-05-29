@@ -74,7 +74,7 @@ resource apiPolicy 'Microsoft.ApiManagement/service/apis/policies@2022-08-01' = 
   name: 'policy'
   parent: restApi
   properties: {
-    format: 'xml'
+    format: 'rawxml'
     value: policy
   }
   dependsOn: [
