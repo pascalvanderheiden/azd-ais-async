@@ -88,6 +88,8 @@ It will prompt you to login, pick a subscription, and provide a location (like "
 
 For more details on the deployed services, see [additional details](#additional-details) below.
 
+https://github.com/user-attachments/assets/d1385808-6a30-4000-8f30-6da0176939d8
+
 ## Additional features
 
 ### CI/CD pipeline
@@ -128,6 +130,10 @@ azd down --purge --force
 
 The resource group and all the resources will be deleted and you'll not be prompted.
 
+### Explain with GitHub Copilot and commiting a change & redeploy
+
+https://github.com/user-attachments/assets/edf14bcd-7a17-4c22-afd9-bd2fbd6aef57
+
 ### Testing
 
 A [tests.http](tests.http) file with relevant tests you can perform is included, to check if your deployment is successful. You need the subcription key, created in API Management in order to test the API. The rest of the names / urls can be fetched from the azd env file here: .azure/<name>/.env or by using this command:
@@ -137,6 +143,8 @@ azd env get-values
 ```
 
 You can find more information about how to create subscription keys [here](https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-create-subscriptions#add-a-subscription-key-to-a-user).
+
+https://github.com/user-attachments/assets/75e929d5-bc57-43b9-9aad-40825603fa73
 
 ### Build Status
 
