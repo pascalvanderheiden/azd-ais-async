@@ -88,7 +88,7 @@ It will prompt you to login, pick a subscription, and provide a location (like "
 
 For more details on the deployed services, see [additional details](#additional-details) below.
 
-https://github.com/user-attachments/assets/d1385808-6a30-4000-8f30-6da0176939d8
+https://github.com/user-attachments/assets/5fc5723a-be93-4152-a102-e669582cf2df
 
 ## Additional features
 
