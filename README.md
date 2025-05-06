@@ -136,7 +136,7 @@ https://github.com/user-attachments/assets/edf14bcd-7a17-4c22-afd9-bd2fbd6aef57
 
 ### Testing
 
-A [tests.http](tests.http) file with relevant tests you can perform is included, to check if your deployment is successful. You need the subcription key, created in API Management in order to test the API. The rest of the names / urls can be fetched from the azd env file here: .azure/<name>/.env or by using this command:
+A [tests.http](tests.http) file with relevant tests you can perform is included, to check if your deployment is successful. You need the consumer subscription key, created in API Management in order to test the API. The rest of the names / urls can be fetched from the azd env file here: .azure/<name>/.env or by using this command:
 
 ```shell
 azd env get-values
